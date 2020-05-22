@@ -4,25 +4,38 @@ from scipy.spatial.transform import Rotation as R
 
 from geometry_msgs.msg import Quaternion, Vector3
 
-def tonp(obj):
+def tonp(obj, excludes=None):
   if isinstance(obj, list) or isinstance(obj, tuple):
     return np.array([tonp(x) for x in obj])
 
-  if isinstance(obj, int) or isinstance(obj, float):
+  if any([isinstance(obj, t) for t in [int, float, str]]):
     return obj
 
-  w = hasattr(obj, 'w')
-  x = hasattr(obj, 'x')
-  y = hasattr(obj, 'y')
-  z = hasattr(obj, 'z')
+  if hasattr(obj, "__slots__"):
+    fields = obj.__slots__
 
-  if w and x and y and z:
-    return R.from_quat([obj.x, obj.y, obj.z, obj.w])
+    w = 'w' in fields
+    x = 'x' in fields
+    y = 'y' in fields
+    z = 'z' in fields
 
-  elif x and y and z:
-    return np.array((obj.x, obj.y, obj.z))
+    if w and x and y and z and len(fields) == 4:
+      return R.from_quat([obj.x, obj.y, obj.z, obj.w])
 
-  print(obj)
+    elif x and y and z and len(fields) == 3:
+      return np.array((obj.x, obj.y, obj.z))
+
+    ret = {}
+
+    for field in fields:
+      if excludes is not None and field in excludes:
+        continue
+
+      ret[field] = tonp(getattr(obj, field), excludes)
+
+    return ret
+
+  print(type(obj), obj)
   assert False
 
 def _tovec3(obj):
