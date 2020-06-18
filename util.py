@@ -14,6 +14,9 @@ def tonp(obj, excludes=None):
   if hasattr(obj, "__slots__"):
     fields = obj.__slots__
 
+    if set(fields) == set(("secs", "nsecs")):
+      return obj.to_sec()
+
     w = 'w' in fields
     x = 'x' in fields
     y = 'y' in fields
