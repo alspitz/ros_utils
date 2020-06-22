@@ -4,6 +4,9 @@ from scipy.spatial.transform import Rotation as R
 
 from geometry_msgs.msg import Quaternion, Vector3
 
+class BasicAttrDict(dict):
+  pass
+
 def tonp(obj, excludes=None):
   if isinstance(obj, list) or isinstance(obj, tuple):
     return np.array([tonp(x) for x in obj])
@@ -28,13 +31,14 @@ def tonp(obj, excludes=None):
     elif x and y and z and len(fields) == 3:
       return np.array((obj.x, obj.y, obj.z))
 
-    ret = {}
+    ret = BasicAttrDict()
 
     for field in fields:
       if excludes is not None and field in excludes:
         continue
 
       ret[field] = tonp(getattr(obj, field), excludes)
+      setattr(ret, field, ret[field])
 
     return ret
 
@@ -77,4 +81,3 @@ def odomtostate(odom):
       tonp(odom.twist.linear),
       tonp(odom.pose.orientation).as_euler('ZYX')[::-1],
       tonp(odom.twist.angular)))
-
