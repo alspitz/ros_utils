@@ -81,3 +81,7 @@ def odomtostate(odom):
       tonp(odom.twist.linear),
       tonp(odom.pose.orientation).as_euler('ZYX')[::-1],
       tonp(odom.twist.angular)))
+
+def ns_join(*names):
+  import rospy
+  return reduce(rospy.names.ns_join, names, "")
