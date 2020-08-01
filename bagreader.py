@@ -18,10 +18,11 @@ def load_bag(filename, include=None, exclude=None):
 
   all_topics = set(tt.topics.keys())
 
-  if include is not None and exclude is not None:
-    raise "Pass only one of include and exclude"
-  elif include is not None:
+  if include is not None:
     topics = [t for t in all_topics if any([it in t for it in include])]
+    if exclude is not None:
+      topics = [t for t in topics if not any([et in t for et in exclude])]
+
   elif exclude is not None:
     topics = [t for t in all_topics if not any([it in t for it in exclude])]
   else:
