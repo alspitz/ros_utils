@@ -40,7 +40,7 @@ def load_bag(filename, include=None, exclude=None):
 
     datas.update(**tonp(msg, excludes=['header']))
 
-    data.add_point(topic, ts_metadata=tt.topics[topic].msg_type, **datas)
+    data.add_point(topic, ts_metadata=(tt.topics[topic].msg_type, topic), **datas)
 
   data.finalize()
   return data
