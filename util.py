@@ -15,24 +15,27 @@ def tonp(obj, excludes=None):
     return obj
 
   if hasattr(obj, "__slots__"):
-    fields = obj.__slots__
+    fields = set(obj.__slots__)
 
-    if set(fields) == set(("secs", "nsecs")):
+    if fields == set(("secs", "nsecs")):
       return obj.to_sec()
 
-    w = 'w' in fields
-    x = 'x' in fields
-    y = 'y' in fields
-    z = 'z' in fields
-
-    if w and x and y and z and len(fields) == 4:
+    if fields == set('wxyz'):
       return R.from_quat([obj.x, obj.y, obj.z, obj.w])
 
-    elif x and y and z and len(fields) == 3:
+    if fields == set('xyz'):
       return np.array((obj.x, obj.y, obj.z))
 
-    ret = BasicAttrDict()
+    # Remove redundant "pose.pose" and "twist.twist" in Odometry.
+    if fields == set(("pose" , "covariance")) or \
+       fields == set(("twist", "covariance")):
+      field = min(fields - set(['covariance']))
+      ret = tonp(getattr(obj, field))
+      ret['covariance'] = tonp(obj.covariance)
+      ret.covariance = ret['covariance']
+      return ret
 
+    ret = BasicAttrDict()
     for field in fields:
       if excludes is not None and field in excludes:
         continue
