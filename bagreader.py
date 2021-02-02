@@ -11,22 +11,41 @@ cachedir = os.path.join(os.path.expanduser('~'), '.cache', 'bagreader')
 memory = joblib.Memory(cachedir, verbose=0, bytes_limit=500000000)
 
 @memory.cache()
-def load_bag(filename, include=None, exclude=None):
+def load_bag(filename, include=None, include_types=None, exclude=None, exclude_types=None):
+  if include is None: include = []
+  if include_types is None: include_types = []
+  if exclude is None: exclude = []
+  if exclude_types is None: exclude_types = []
+
+  if isinstance(include, str):
+    include = [include]
+
+  if isinstance(exclude, str):
+    exclude = [exclude]
+
+  assert not set(include_types).intersection(set(exclude_types))
+
   print("Reading bag %s..." % filename)
   bag = rosbag.Bag(filename)
-  tt = bag.get_type_and_topic_info()
+  ttt = bag.get_type_and_topic_info()
 
-  all_topics = set(tt.topics.keys())
+  topics = []
+  for topic, tt in ttt.topics.items():
+    msg_type = tt.msg_type
 
-  if include is not None:
-    topics = [t for t in all_topics if any([it in t for it in include])]
-    if exclude is not None:
-      topics = [t for t in topics if not any([et in t for et in exclude])]
+    name_include = any([it in topic for it in include])
+    type_include = msg_type in include_types
+    name_exclude = any([et in topic for et in exclude])
+    type_exclude = msg_type in exclude_types
 
-  elif exclude is not None:
-    topics = [t for t in all_topics if not any([it in t for it in exclude])]
-  else:
-    topics = all_topics
+    if name_exclude or type_exclude:
+      continue
+
+    if include or include_types:
+      if name_include or type_include:
+        topics.append(topic)
+    else:
+      topics.append(topic)
 
   data = DataSet()
 
@@ -40,7 +59,7 @@ def load_bag(filename, include=None, exclude=None):
 
     datas.update(**tonp(msg, excludes=['header']))
 
-    data.add_point(topic, ts_metadata=(tt.topics[topic].msg_type, topic), **datas)
+    data.add_point(topic, ts_metadata=(ttt.topics[topic].msg_type, topic), **datas)
 
   data.finalize()
   return data
