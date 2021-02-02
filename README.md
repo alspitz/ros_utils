@@ -15,9 +15,9 @@ from ros_utils.bagreader import load_bag
 
 bagfilename = "..."
 bag = load_bag(bagfilename, include=["odom"])
-plt.plot(bag.odom.times, bag.odom.pose.pose.position[:, 0], label="X Position")
-plt.plot(bag.odom.times, bag.odom.pose.pose.position[:, 1], label="Y Position")
-plt.plot(bag.odom.times, bag.odom.pose.pose.position[:, 2], label="Z Position")
+plt.plot(bag.odom.times, bag.odom.pose.position[:, 0], label="X Position")
+plt.plot(bag.odom.times, bag.odom.pose.position[:, 1], label="Y Position")
+plt.plot(bag.odom.times, bag.odom.pose.position[:, 2], label="Z Position")
 plt.legend()
 plt.show()
 ```
