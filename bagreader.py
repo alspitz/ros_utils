@@ -49,17 +49,21 @@ def load_bag(filename, include=None, include_types=None, exclude=None, exclude_t
 
   data = DataSet()
 
-  messages = bag.read_messages(topics)
-  for topic, msg, msg_t in messages:
-    datas = { 'meta_time' : msg_t.to_sec() }
-    if hasattr(msg, 'header'):
-      datas['time'] = msg.header.stamp.to_sec()
-    else:
-      datas['time'] = msg_t.to_sec()
+  # read_messages will read all if topics is [].
+  if topics:
+    messages = bag.read_messages(topics)
+    for topic, msg, msg_t in messages:
+      datas = { 'meta_time' : msg_t.to_sec() }
+      if hasattr(msg, 'header'):
+        datas['time'] = msg.header.stamp.to_sec()
+      else:
+        datas['time'] = msg_t.to_sec()
 
-    datas.update(**tonp(msg, excludes=['header']))
+      datas.update(**tonp(msg, excludes=['header']))
 
-    data.add_point(topic, ts_metadata=(ttt.topics[topic].msg_type, topic), **datas)
+      data.add_point(topic, ts_metadata=(ttt.topics[topic].msg_type, topic), **datas)
+  else:
+    print("WARNING: No suitable topics found in", filename)
 
   data.finalize()
   return data
