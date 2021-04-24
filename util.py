@@ -90,5 +90,6 @@ def odomtostate(odom):
       tonp(odom.twist.angular)))
 
 def ns_join(*names):
+  import functools
   import rospy
-  return reduce(rospy.names.ns_join, names, "")
+  return functools.reduce(rospy.names.ns_join, names, "")
