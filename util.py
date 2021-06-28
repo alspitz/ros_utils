@@ -21,7 +21,8 @@ def tonp(obj, excludes=None):
       return obj.to_sec()
 
     if fields == set('wxyz'):
-      if np.linalg.norm(np.array((obj.x, obj.y, obj.z, obj.w))) < 1e-8:
+      qarr = np.array((obj.x, obj.y, obj.z, obj.w))
+      if (not np.all(np.isfinite(qarr))) or np.linalg.norm(qarr) < 1e-8:
         # What to return here?
         return R.from_rotvec([np.nan, np.nan, np.nan])
 
