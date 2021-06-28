@@ -8,7 +8,8 @@ from ros_utils.util import tonp
 import joblib
 
 cachedir = os.path.join(os.path.expanduser('~'), '.cache', 'bagreader')
-memory = joblib.Memory(cachedir, verbose=0, bytes_limit=500000000)
+memory = joblib.Memory(cachedir, verbose=0, bytes_limit=1_000_000_000)
+memory.reduce_size()
 
 @memory.cache()
 def load_bag(filename, include=None, include_types=None, exclude=None, exclude_types=None):
