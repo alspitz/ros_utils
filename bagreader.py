@@ -12,7 +12,7 @@ memory = joblib.Memory(cachedir, verbose=0, bytes_limit=1_000_000_000)
 memory.reduce_size()
 
 @memory.cache()
-def load_bag(filename, include=None, include_types=None, exclude=None, exclude_types=None):
+def load_bag(filename, include=None, include_types=None, exclude=None, exclude_types=None, maxt=None):
   if include is None: include = []
   if include_types is None: include_types = []
   if exclude is None: exclude = []
@@ -50,10 +50,19 @@ def load_bag(filename, include=None, include_types=None, exclude=None, exclude_t
 
   data = DataSet()
 
+  t0 = None
+
   # read_messages will read all if topics is [].
   if topics:
     messages = bag.read_messages(topics)
     for topic, msg, msg_t in messages:
+      if t0 is None:
+        t0 = msg_t
+
+      if maxt is not None and (msg_t - t0).to_sec() > maxt:
+        print("WARNING: Ending bag read early after reaching maxt = %0.2f" % maxt)
+        break
+
       datas = { 'meta_time' : msg_t.to_sec() }
       if hasattr(msg, 'header'):
         datas['time'] = msg.header.stamp.to_sec()
