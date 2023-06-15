@@ -2,8 +2,6 @@ import numpy as np
 
 from scipy.spatial.transform import Rotation as R
 
-from geometry_msgs.msg import Quaternion, Vector3
-
 class BasicAttrDict(dict):
   pass
 
@@ -66,6 +64,7 @@ def _toquat(obj):
   return q_ret
 
 def toros(obj):
+  from geometry_msgs.msg import Quaternion, Vector3
   if type(obj) is R:
     return _toquat(obj)
   elif len(obj.shape) == 1:
