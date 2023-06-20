@@ -1,8 +1,9 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="ros_utils",
-    package_dir={"": "ros_utils"},
+    packages=find_packages(),
     author="Alex Spitzer",
+    author_email="aes368@cornell.edu",
     license=open("LICENSE", mode="r").read(),
 )
