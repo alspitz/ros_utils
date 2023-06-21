@@ -52,9 +52,11 @@ def tonp(obj, excludes=None):
   assert False
 
 def _tovec3(obj):
+  from geometry_msgs.msg import Vector3
   return Vector3(obj[0], obj[1], obj[2])
 
 def _toquat(obj):
+  from geometry_msgs.msg import Quaternion
   q_wlast = obj.as_quat()
   q_ret = Quaternion()
   q_ret.x = q_wlast[0]
@@ -64,7 +66,6 @@ def _toquat(obj):
   return q_ret
 
 def toros(obj):
-  from geometry_msgs.msg import Quaternion, Vector3
   if type(obj) is R:
     return _toquat(obj)
   elif len(obj.shape) == 1:
