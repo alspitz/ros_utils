@@ -9,7 +9,7 @@ def tonp(obj, excludes=None):
   if isinstance(obj, list) or isinstance(obj, tuple):
     return np.array([tonp(x) for x in obj])
 
-  if any([isinstance(obj, t) for t in [int, float, str]]):
+  if any([isinstance(obj, t) for t in [int, float, str, bytes]]):
     return obj
 
   if hasattr(obj, "__slots__"):
