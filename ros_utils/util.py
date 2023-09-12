@@ -12,44 +12,46 @@ def tonp(obj, excludes=None):
   if any([isinstance(obj, t) for t in [int, float, str, bytes]]):
     return obj
 
+  if isinstance(obj, np.ndarray):
+    return obj
+
   if hasattr(obj, "__slots__"):
     fields = set(obj.__slots__)
+  else:
+    fields = set([f for f in dir(obj) if '__' not in f])
 
-    if fields == set(("secs", "nsecs")):
-      return obj.to_sec()
+  if fields == set(("secs", "nsecs")):
+    return obj.to_sec()
 
-    if fields == set('wxyz'):
-      qarr = np.array((obj.x, obj.y, obj.z, obj.w))
-      if (not np.all(np.isfinite(qarr))) or np.linalg.norm(qarr) < 1e-8:
-        # What to return here?
-        return R.from_rotvec([np.nan, np.nan, np.nan])
+  if fields == set('wxyz'):
+    qarr = np.array((obj.x, obj.y, obj.z, obj.w))
+    if (not np.all(np.isfinite(qarr))) or np.linalg.norm(qarr) < 1e-8:
+      # What to return here?
+      return R.from_rotvec([np.nan, np.nan, np.nan])
 
-      return R.from_quat([obj.x, obj.y, obj.z, obj.w])
+    return R.from_quat([obj.x, obj.y, obj.z, obj.w])
 
-    if fields == set('xyz'):
-      return np.array((obj.x, obj.y, obj.z))
+  if fields == set('xyz'):
+    return np.array((obj.x, obj.y, obj.z))
 
-    # Remove redundant "pose.pose" and "twist.twist" in Odometry.
-    if fields == set(("pose" , "covariance")) or \
-       fields == set(("twist", "covariance")):
-      field = min(fields - set(['covariance']))
-      ret = tonp(getattr(obj, field))
-      ret['covariance'] = tonp(obj.covariance)
-      ret.covariance = ret['covariance']
-      return ret
-
-    ret = BasicAttrDict()
-    for field in fields:
-      if excludes is not None and field in excludes:
-        continue
-
-      ret[field] = tonp(getattr(obj, field), excludes)
-      setattr(ret, field, ret[field])
-
+  # Remove redundant "pose.pose" and "twist.twist" in Odometry.
+  if fields == set(("pose" , "covariance")) or \
+     fields == set(("twist", "covariance")):
+    field = min(fields - set(['covariance']))
+    ret = tonp(getattr(obj, field))
+    ret['covariance'] = tonp(obj.covariance)
+    ret.covariance = ret['covariance']
     return ret
 
-  print(type(obj), obj)
-  assert False
+  ret = BasicAttrDict()
+  for field in fields:
+    if excludes is not None and field in excludes:
+      continue
+
+    ret[field] = tonp(getattr(obj, field), excludes)
+    setattr(ret, field, ret[field])
+
+  return ret
 
 def _tovec3(obj):
   from geometry_msgs.msg import Vector3
