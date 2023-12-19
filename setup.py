@@ -6,4 +6,7 @@ setup(
     author="Alex Spitzer",
     author_email="aes368@cornell.edu",
     license=open("LICENSE", mode="r").read(),
+    install_requires=[
+      'scipy>=1.2.0',
+    ],
 )
