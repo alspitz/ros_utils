@@ -17,6 +17,8 @@ def tonp(obj, excludes=None):
 
   if hasattr(obj, "__slots__"):
     fields = set(obj.__slots__)
+  elif hasattr(obj, "fields") and callable(obj.fields):
+    fields = set(obj.fields())
   else:
     fields = set([f for f in dir(obj) if '__' not in f])
 
